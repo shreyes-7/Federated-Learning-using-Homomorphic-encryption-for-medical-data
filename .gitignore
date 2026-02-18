@@ -10,7 +10,6 @@ __pycache__/
 *.egg-info/
 *.egg
 dist/
-build/
 .eggs/
 *.log
 *.sqlite3
@@ -29,7 +28,6 @@ build/
 env/
 venv/
 ENV/
-securefl/
 *.conda
 .conda/
 .env
@@ -43,10 +41,10 @@ securefl/
 *.code-workspace
 
 ########################################
-# 🧠 C++ Build Files (OpenFHE + SecureFL)
+# 🧠 C++ Build Files (All Schemes)
 ########################################
 
-# All CMake build folders
+# Ignore ALL build directories (bgv, bfv, ckks)
 **/build/
 
 # CMake generated files
@@ -56,23 +54,13 @@ cmake_install.cmake
 Makefile
 
 ########################################
-# 🔐 OpenFHE Binaries
+# 🔑 Generated Encryption Outputs
 ########################################
 
-openfhe_lib/bgv/build/
-openfhe_lib/bfv/build/
-
-########################################
-# 🔑 Generated Encryption Files
-########################################
-
-*.txt
+enc_*.txt
 *.key
 *.bin
 *.dat
-
-# If ciphertext files are generated
-enc_*.txt
 
 ########################################
 # 🐧 Linux Temporary
@@ -90,13 +78,7 @@ enc_*.txt
 Thumbs.db
 
 ########################################
-# 🐳 Docker (if you add later)
-########################################
-
-.dockerignore
-
-########################################
-# 📦 OpenFHE (if cloned inside project)
+# 📦 External Libraries
 ########################################
 
 openfhe-development/
