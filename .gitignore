@@ -1,0 +1,102 @@
+########################################
+# 🐍 Python
+########################################
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.log
+*.sqlite3
+
+########################################
+# 📓 Jupyter
+########################################
+
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+########################################
+# 🧪 Conda / Virtual Environments
+########################################
+
+env/
+venv/
+ENV/
+securefl/
+*.conda
+.conda/
+.env
+.envrc
+
+########################################
+# 🖥️ VS Code
+########################################
+
+.vscode/
+*.code-workspace
+
+########################################
+# 🧠 C++ Build Files (OpenFHE + SecureFL)
+########################################
+
+# All CMake build folders
+**/build/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+########################################
+# 🔐 OpenFHE Binaries
+########################################
+
+openfhe_lib/bgv/build/
+openfhe_lib/bfv/build/
+
+########################################
+# 🔑 Generated Encryption Files
+########################################
+
+*.txt
+*.key
+*.bin
+*.dat
+
+# If ciphertext files are generated
+enc_*.txt
+
+########################################
+# 🐧 Linux Temporary
+########################################
+
+*~
+*.swp
+*.swo
+
+########################################
+# 🧾 OS Files
+########################################
+
+.DS_Store
+Thumbs.db
+
+########################################
+# 🐳 Docker (if you add later)
+########################################
+
+.dockerignore
+
+########################################
+# 📦 OpenFHE (if cloned inside project)
+########################################
+
+openfhe-development/
