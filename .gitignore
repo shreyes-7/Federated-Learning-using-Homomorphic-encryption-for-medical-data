@@ -1,84 +1,11 @@
-########################################
-# 🐍 Python
-########################################
-
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.so
-*.egg-info/
-*.egg
-dist/
-.eggs/
-*.log
-*.sqlite3
-
-########################################
-# 📓 Jupyter
-########################################
-
 .ipynb_checkpoints/
-*.nbconvert.ipynb
-
-########################################
-# 🧪 Conda / Virtual Environments
-########################################
-
-env/
+.venv/
 venv/
-ENV/
-*.conda
-.conda/
-.env
-.envrc
-
-########################################
-# 🖥️ VS Code
-########################################
-
-.vscode/
-*.code-workspace
-
-########################################
-# 🧠 C++ Build Files (All Schemes)
-########################################
-
-# Ignore ALL build directories (bgv, bfv, ckks)
-**/build/
-
-# CMake generated files
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-
-########################################
-# 🔑 Generated Encryption Outputs
-########################################
-
-enc_*.txt
-*.key
-*.bin
-*.dat
-
-########################################
-# 🐧 Linux Temporary
-########################################
-
-*~
-*.swp
-*.swo
-
-########################################
-# 🧾 OS Files
-########################################
-
-.DS_Store
-Thumbs.db
-
-########################################
-# 📦 External Libraries
-########################################
-
-openfhe-development/
+.cache/
+.streamlit/
+openfhe_lib/*/build/
+data/*/enc_*.txt

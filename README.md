@@ -3,74 +3,184 @@
 A privacy-preserving machine learning framework combining:
 
 - 🧠 Federated Learning (FL)
-- 🔐 Homomorphic Encryption (OpenFHE)
-- 🏥 Multi-hospital collaborative training
-- 🔒 BGV, BFV & CKKS encryption schemes
+- 🔐 Homomorphic Encryption (HE) with OpenFHE (BGV/BFV)
+- 🛡️ Malicious client attack simulation + anomaly detection
+- 📊 Streamlit dashboard for explainability and demo readiness
 
-This project demonstrates secure collaborative learning where multiple hospitals train a shared machine learning model **without sharing raw patient data**.
+This repository now includes both:
 
----
-
-# 📌 Project Overview
-
-In healthcare systems:
-
-- Patient data is highly sensitive  
-- Regulations prevent raw data sharing  
-- Centralized machine learning risks privacy violations  
-
-This project solves the problem using:
-
-Federated Learning + Homomorphic Encryption
-
-✔ Each hospital trains locally  
-✔ Model weights are encrypted  
-✔ Server aggregates encrypted weights  
-✔ No raw data is shared  
+1. **Legacy notebook workflow** (original project assets), and
+2. **Production-style modular Python pipeline** (clean, reusable, interview-ready).
 
 ---
 
-# 🏗️ System Architecture
+## 📌 Why This Project Matters
 
-Windows  
-   ↓  
-WSL2 (Linux)  
-   ↓  
-OpenFHE v1.0.4  
-   ↓  
-SecureFL C++ (BGV / BFV / CKKS Encryption)  
-   ↓  
-Conda Python 3.10  
-   ↓  
-Jupyter Notebook  
-   ↓  
-Federated Learning + Encrypted Aggregation  
+In healthcare systems, patient data is highly sensitive and often cannot be centrally pooled due to compliance, policy, and trust constraints.
+
+This project demonstrates a secure collaborative learning pattern where:
+
+- Hospitals train locally on private data
+- Only model updates (not raw records) leave each hospital
+- Updates are encrypted before aggregation
+- Server computes global updates over encrypted values
+- Malicious participants can be detected and filtered
 
 ---
 
-# ⚙️ Technologies Used
+## 🧠 Core Theory
+
+### Federated Learning (FL)
+
+Federated Learning trains a shared global model across many clients (hospitals) without moving raw data.
+
+At round `t`:
+
+1. Server shares current global parameters `w_t`
+2. Each client trains locally on private dataset shard
+3. Client sends update `Δw_i = w_i - w_t`
+4. Server aggregates updates to produce `w_(t+1)`
+
+### Homomorphic Encryption (HE)
+
+HE allows arithmetic directly on ciphertext.
+
+In this project:
+
+- Client updates are encrypted
+- Server adds encrypted updates (no plaintext exposure)
+- Aggregated ciphertext is decrypted to recover aggregated update
+
+### Robustness Against Malicious Clients
+
+We simulate Byzantine-like update poisoning and apply simple statistical filtering:
+
+- Compute mean update
+- Compute distance of each client update from mean
+- Set threshold:
+
+`threshold = mean(distance) + k * std(distance)`
+
+- Flag clients above threshold
+- Remove/neutralize them before final aggregation
+
+This lets reviewers compare model quality:
+
+- **With attack** (unfiltered)
+- **After filtering** (defended)
+
+---
+
+## 🏗️ Architecture (Refactored)
+
+```text
+project/
+├── core/
+│   ├── fl_simulation.py      # End-to-end FL loop orchestration
+│   ├── aggregation.py        # Aggregation helpers
+│   └── model.py              # Logistic regression model (NumPy)
+├── security/
+│   ├── encryption.py         # Pluggable backends: simulated / openfhe
+│   ├── attack.py             # Malicious update simulation
+│   └── detection.py          # Distance-based anomaly detection
+├── dashboard/
+│   └── app.py                # Streamlit UI
+├── utils/
+│   └── helpers.py            # Dataset prep / splitting / reproducibility
+├── data/
+├── openfhe_lib/              # Existing C++ + Python wrappers (legacy-real HE path)
+├── main.py                   # CLI runner
+└── requirements.txt
+```
+
+---
+
+## 🔄 End-to-End Functional Flow
+
+1. Initialize global model and clients
+2. Split dataset among clients
+3. Local training on each client shard
+4. Generate client updates
+5. Optional malicious attack injection
+6. Encrypt updates (`simulated` or `openfhe`)
+7. Build baseline aggregation (with attack)
+8. Run anomaly detection and flag suspicious clients
+9. Filter/neutralize flagged updates
+10. Aggregate filtered encrypted updates
+11. Update global model
+12. Track accuracy and diagnostics per round
+13. Render results in Streamlit dashboard
+
+---
+
+## ⚙️ Technology Stack
 
 | Component | Technology |
-|------------|------------|
-| ML Framework | PyTorch |
-| Encryption Library | OpenFHE v1.0.4 |
-| Encryption Schemes | BGV, BFV & CKKS |
+|---|---|
+| FL Training | NumPy Logistic Regression |
+| Dataset | scikit-learn breast cancer dataset |
+| Encryption | OpenFHE wrappers (BGV/BFV) + simulation backend |
+| Dashboard | Streamlit |
 | Languages | Python + C++ |
-| Environment | Conda |
-| IDE | VS Code (Remote - WSL) |
 
 ---
 
-# 🚀 Setup Guide
+## 🚀 Setup Guide
 
-## 🟢 1. Setup WSL
+## 🟢 Option A: Quick Start (Refactored Pipeline)
+
+Run from project root:
+
+```bash
+cd /home/nexushunter/SecureFL_crypto_project
+```
+
+Create and activate virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Run CLI (simulated encryption)
+
+```bash
+python main.py --backend simulated --num-clients 6 --rounds 8 --attack --attack-type scaling
+```
+
+### Run CLI (real OpenFHE path)
+
+```bash
+python main.py --backend openfhe --scheme bgv --num-clients 4 --rounds 3 --attack
+```
+
+### Run dashboard
+
+```bash
+streamlit run dashboard/app.py
+```
+
+Open: `http://localhost:8501`
+
+---
+
+## 🟢 Option B: Legacy/Original Environment Setup (Kept for Compatibility)
+
+### 1) Setup WSL
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git cmake build-essential libomp-dev wget
 ```
 
-## 🟢 2. Install Miniconda
+### 2) Install Miniconda
 
 ```bash
 cd ~
@@ -78,7 +188,7 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-## 🟢 3. Create Python Environment
+### 3) Create Python Environment
 
 ```bash
 conda create -n securefl python=3.10 -y
@@ -88,7 +198,7 @@ pip install jupyter ipykernel numpy pandas matplotlib scikit-learn imbalanced-le
 python -m ipykernel install --user --name securefl --display-name "Python (SecureFL)"
 ```
 
-## 🟢 4. Install OpenFHE (v1.0.4 Required)
+### 4) Install OpenFHE (v1.0.4 example)
 
 ```bash
 cd ~
@@ -104,66 +214,153 @@ make -j2
 sudo make install
 ```
 
-# 🔧 Build Encryption Schemes
-
-## 🟢 Build BGV
+### Build scheme binaries in this repo
 
 ```bash
-cd openfhe_lib/bgv
-rm -rf build
-mkdir build
-cd build
+cd /home/nexushunter/SecureFL_crypto_project/openfhe_lib/bgv
+rm -rf build && mkdir build && cd build
 cmake ..
 make -j2
-```
 
-## 🟢 Build BFV
-
-```bash
 cd ../../bfv
-rm -rf build
-mkdir build
-cd build
+rm -rf build && mkdir build && cd build
 cmake ..
 make -j2
-```
 
-## 🟢 Build CKKS
-
-```bash
 cd ../../ckks
-rm -rf build
-mkdir build
-cd build
+rm -rf build && mkdir build && cd build
 cmake ..
 make -j2
 ```
 
-# ▶️ Run the Project
+---
+
+## 🧪 Command Reference
+
+### Core CLI arguments
 
 ```bash
-conda activate securefl
-jupyter notebook
+python main.py \
+  --backend simulated|openfhe \
+  --scheme bgv|bfv \
+  --num-clients 4 \
+  --rounds 8 \
+  --local-epochs 2 \
+  --lr 0.05 \
+  --detection-k 1.0 \
+  --seed 42 \
+  --attack \
+  --attack-type scaling|random \
+  --malicious-fraction 0.25 \
+  --scaling-factor 8.0 \
+  --noise-std 5.0
 ```
 
-Open: federated-learning-and-bgv-scheme.ipynb  
-Select kernel: Python (SecureFL)  
-Restart Kernel → Run All.
+### Examples
+
+Simulated backend, random attack:
+
+```bash
+python main.py --backend simulated --num-clients 8 --rounds 10 --attack --attack-type random --noise-std 6.0
+```
+
+OpenFHE backend (BGV):
+
+```bash
+python main.py --backend openfhe --scheme bgv --num-clients 4 --rounds 5 --attack
+```
+
+OpenFHE backend (BFV):
+
+```bash
+python main.py --backend openfhe --scheme bfv --num-clients 4 --rounds 5 --attack
+```
 
 ---
 
-# 🔐 Encryption Workflow
+## 📊 Dashboard Guide
 
-1. Each hospital trains locally.
-2. Model weights are encrypted using BGV / BFV / CKKS.
-3. Encrypted weights are sent to server.
-4. Server performs homomorphic aggregation.
-5. Aggregated ciphertext is returned.
-6. Clients decrypt and continue training.
+Sidebar controls:
+
+- Number of clients
+- Rounds
+- Local epochs
+- Learning rate
+- Detection threshold `k`
+- Seed
+- Encryption backend
+- OpenFHE scheme
+- Encryption detail toggle
+- Attack toggle and attack parameters
+
+Main outputs:
+
+- Final accuracy with attack
+- Final accuracy after filtering
+- Accuracy over rounds chart
+- Detection summary table
+- Client update distance bars
+- Encrypted update preview
 
 ---
 
-# 👨‍💻 Author
+## 🔁 Real HE vs Simulated HE
+
+### Simulated backend
+
+- Great for fast experimentation
+- Flexible number of clients
+- Uses masked-value toy encryption (not production crypto)
+
+### OpenFHE backend
+
+- Uses existing OpenFHE wrappers and C++ binaries
+- Demonstrates real HE encryption/aggregation path
+- Current repository limitation: **fixed to 4 clients** in C++ server wrapper
+
+---
+
+## 🔍 What Is Actually “Real” In This Project?
+
+- Real local training and federated update flow: ✅
+- Real attack injection and statistical anomaly detection: ✅
+- Real OpenFHE execution path (in `openfhe` mode): ✅
+- Live multi-hospital deployment integration (networked institutions, IAM, KMS/HSM, mTLS): ❌ (outside scope of demo)
+
+This is an engineering-accurate prototype and evaluation harness for secure FL behavior.
+
+---
+
+## 🛡️ Security Notes and Limitations
+
+- Current detection is distance-based and simple; robust aggregators (e.g., Krum, Trimmed Mean, Median) can be added.
+- OpenFHE wrapper currently uses file-based ciphertext exchange.
+- Key management in this demo is local-file based, not HSM/KMS managed.
+- Production deployment should include authenticated channels, audit logging, key rotation, and secure orchestration.
+
+---
+
+## 📚 Legacy Notebooks (Still Included)
+
+These notebooks are retained for educational/reference value:
+
+- `federated-learning-and-bgv-scheme.ipynb`
+- `federated-learning-and-bfv-scheme.ipynb`
+- `encrypted_learning.ipynb`
+
+They are not the runtime entrypoint for the refactored modular pipeline.
+
+---
+
+## ▶️ Entry Points Summary
+
+- CLI: `python main.py ...`
+- Dashboard: `streamlit run dashboard/app.py`
+- Legacy notebook mode: `jupyter notebook`
+
+---
+
+## 👨‍💻 Author
 
 Shreyes  
 Software Engineer  
