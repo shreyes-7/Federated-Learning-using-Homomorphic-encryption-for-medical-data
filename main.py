@@ -20,6 +20,27 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--backend", choices=["simulated", "openfhe"], default="simulated")
     parser.add_argument("--scheme", choices=["bgv", "bfv"], default="bgv")
+    parser.add_argument(
+        "--aggregation-method",
+        choices=["fedavg", "trimmed_mean", "coordinate_median", "trust_weighted"],
+        default="trust_weighted",
+    )
+    parser.add_argument("--trim-ratio", type=float, default=0.2)
+
+    parser.add_argument("--partition-mode", choices=["iid", "label_skew"], default="iid")
+    parser.add_argument("--label-skew-strength", type=float, default=0.85)
+
+    parser.add_argument("--enable-drift", action="store_true")
+    parser.add_argument("--drift-start-round", type=int, default=4)
+    parser.add_argument("--drift-strength", type=float, default=0.15)
+
+    parser.add_argument("--dp", action="store_true", help="Enable DP noise on client updates")
+    parser.add_argument("--dp-noise-std", type=float, default=0.01)
+
+    parser.add_argument("--trust-beta", type=float, default=0.7)
+    parser.add_argument("--trust-min", type=float, default=0.1)
+    parser.add_argument("--trust-flag-penalty", type=float, default=0.5)
+    parser.add_argument("--disable-audit", action="store_true")
 
     parser.add_argument("--attack", action="store_true", help="Enable malicious attack simulation")
     parser.add_argument("--attack-type", choices=["scaling", "random"], default="scaling")
@@ -41,6 +62,19 @@ def main() -> None:
         seed=args.seed,
         encryption_backend=args.backend,
         encryption_scheme=args.scheme,
+        aggregation_method=args.aggregation_method,
+        trim_ratio=args.trim_ratio,
+        use_dp=args.dp,
+        dp_noise_std=args.dp_noise_std,
+        partition_mode=args.partition_mode,
+        label_skew_strength=args.label_skew_strength,
+        enable_drift=args.enable_drift,
+        drift_start_round=args.drift_start_round,
+        drift_strength=args.drift_strength,
+        trust_beta=args.trust_beta,
+        trust_min=args.trust_min,
+        trust_flag_penalty=args.trust_flag_penalty,
+        enable_audit=not args.disable_audit,
     )
 
     attack_config = AttackConfig(
@@ -55,8 +89,14 @@ def main() -> None:
 
     print("=== SecureFL Simulation Summary ===")
     print(f"Backend: {args.backend} ({args.scheme})")
+    print(f"Strategy: {result.summary.get('selected_strategy')}")
     print(f"Final accuracy with attack: {result.final_accuracy_with_attack:.4f}")
     print(f"Final accuracy after filtering: {result.final_accuracy_after_filtering:.4f}")
+    print(f"Audit chain valid: {result.audit_chain_valid}")
+    if result.summary.get("strategy_note"):
+        print(f"Note: {result.summary['strategy_note']}")
+    print("Summary:")
+    print(json.dumps(result.summary, indent=2))
     print("\nRound details:")
     print(json.dumps(result.rounds, indent=2))
 

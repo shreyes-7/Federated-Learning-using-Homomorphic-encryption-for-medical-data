@@ -237,18 +237,41 @@ make -j2
 
 ## 🧪 Command Reference
 
+### New Unique Modes (What You Added)
+
+- Adaptive trust-weighted aggregation (`trust_weighted`)
+- Robust alternatives (`trimmed_mean`, `coordinate_median`)
+- Non-IID label-skew client partitioning
+- Temporal feature drift simulation across rounds
+- Optional differential privacy (DP) noise on client updates
+- Verifiable audit hash chain for each round
+- Automatic FedAvg fallback in OpenFHE mode when non-additive strategy is selected
+
 ### Core CLI arguments
 
 ```bash
 python main.py \
   --backend simulated|openfhe \
   --scheme bgv|bfv \
+  --aggregation-method fedavg|trimmed_mean|coordinate_median|trust_weighted \
+  --trim-ratio 0.2 \
   --num-clients 4 \
   --rounds 8 \
   --local-epochs 2 \
   --lr 0.05 \
   --detection-k 1.0 \
   --seed 42 \
+  --partition-mode iid|label_skew \
+  --label-skew-strength 0.85 \
+  --enable-drift \
+  --drift-start-round 4 \
+  --drift-strength 0.15 \
+  --dp \
+  --dp-noise-std 0.01 \
+  --trust-beta 0.7 \
+  --trust-min 0.1 \
+  --trust-flag-penalty 0.5 \
+  --disable-audit \
   --attack \
   --attack-type scaling|random \
   --malicious-fraction 0.25 \
@@ -262,6 +285,21 @@ Simulated backend, random attack:
 
 ```bash
 python main.py --backend simulated --num-clients 8 --rounds 10 --attack --attack-type random --noise-std 6.0
+```
+
+Unique stress test run (recommended demo):
+
+```bash
+python main.py \
+  --backend simulated \
+  --num-clients 8 \
+  --rounds 8 \
+  --aggregation-method trust_weighted \
+  --partition-mode label_skew \
+  --enable-drift \
+  --dp \
+  --attack \
+  --attack-type scaling
 ```
 
 OpenFHE backend (BGV):
@@ -290,16 +328,27 @@ Sidebar controls:
 - Seed
 - Encryption backend
 - OpenFHE scheme
+- Aggregation strategy
+- Trust hyperparameters
 - Encryption detail toggle
 - Attack toggle and attack parameters
+- Data mode (`iid` vs `label_skew`)
+- Drift toggle and parameters
+- DP toggle and DP-noise level
+- Audit toggle
+- FedAvg baseline comparison toggle
 
 Main outputs:
 
 - Final accuracy with attack
 - Final accuracy after filtering
+- Strategy comparison vs FedAvg baseline
 - Accuracy over rounds chart
+- Detection precision/recall over rounds
 - Detection summary table
 - Client update distance bars
+- Trust evolution chart
+- Audit chain table
 - Encrypted update preview
 
 ---
@@ -311,12 +360,14 @@ Main outputs:
 - Great for fast experimentation
 - Flexible number of clients
 - Uses masked-value toy encryption (not production crypto)
+- Supports all advanced modes (trust, robust strategies, non-IID, drift, DP, audit)
 
 ### OpenFHE backend
 
 - Uses existing OpenFHE wrappers and C++ binaries
 - Demonstrates real HE encryption/aggregation path
 - Current repository limitation: **fixed to 4 clients** in C++ server wrapper
+- Non-additive strategies are auto-fallback to FedAvg in this mode
 
 ---
 
@@ -333,7 +384,8 @@ This is an engineering-accurate prototype and evaluation harness for secure FL b
 
 ## 🛡️ Security Notes and Limitations
 
-- Current detection is distance-based and simple; robust aggregators (e.g., Krum, Trimmed Mean, Median) can be added.
+- Includes robust strategies (`trimmed_mean`, `coordinate_median`, `trust_weighted`) and distance-based detection.
+- Detection remains a lightweight heuristic; production should consider stronger Byzantine defenses (e.g., Krum/Bulyan family).
 - OpenFHE wrapper currently uses file-based ciphertext exchange.
 - Key management in this demo is local-file based, not HSM/KMS managed.
 - Production deployment should include authenticated channels, audit logging, key rotation, and secure orchestration.
