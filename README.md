@@ -412,6 +412,85 @@ They are not the runtime entrypoint for the refactored modular pipeline.
 
 ---
 
+## 🎤 Presentation Demo Steps
+
+Use this exact sequence for reviewer presentation.
+
+### 1) Activate environment
+
+```bash
+cd /home/nexushunter/SecureFL_crypto_project
+source .venv/bin/activate
+```
+
+### 2) Run unique contribution CLI experiment
+
+```bash
+python3 main.py \
+  --backend simulated \
+  --num-clients 8 \
+  --rounds 8 \
+  --aggregation-method trust_weighted \
+  --partition-mode label_skew \
+  --enable-drift \
+  --dp \
+  --attack \
+  --attack-type scaling
+```
+
+### 3) Run FedAvg baseline CLI for comparison
+
+```bash
+python3 main.py \
+  --backend simulated \
+  --num-clients 8 \
+  --rounds 8 \
+  --aggregation-method fedavg \
+  --partition-mode label_skew \
+  --enable-drift \
+  --dp \
+  --attack \
+  --attack-type scaling
+```
+
+### 4) Launch dashboard
+
+```bash
+streamlit run dashboard/app.py
+```
+
+### 5) Dashboard settings to show
+
+- Encryption backend: `simulated`
+- Aggregation strategy: `trust_weighted`
+- Enable attack simulation: `ON`
+- Client data mode: `label_skew`
+- Enable temporal drift: `ON`
+- Enable DP noise: `ON`
+- Enable audit chain: `ON`
+- Compare against FedAvg baseline: `ON`
+
+### 6) What to highlight during demo
+
+- `Final Accuracy (With Attack)` vs `Final Accuracy (After Filtering)`
+- `What Is Unique In This Run` table
+- FedAvg delta banner
+- `Detection Quality Over Rounds`
+- `Trust Evolution`
+- `DP Noise Magnitude`
+- `Audit Chain`
+- `Encrypted Update Preview`
+
+### 7) Optional real OpenFHE proof run
+
+```bash
+python3 main.py --backend openfhe --scheme bgv --num-clients 4 --rounds 3 --attack
+```
+
+Use this to show actual OpenFHE wrapper path is integrated.
+
+---
+
 ## 👨‍💻 Author
 
 Shreyes  
