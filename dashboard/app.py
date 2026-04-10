@@ -18,7 +18,7 @@ from core.fl_simulation import FLConfig, run_federated_simulation
 from security.attack import AttackConfig
 
 st.set_page_config(page_title="SecureFL Dashboard", layout="wide")
-st.title("Federated Learning + Homomorphic Encryption (Medical Demo)")
+st.title("SecureFL: Privacy-Preserving Federated Learning for Medical Data")
 
 with st.sidebar:
     st.header("Simulation Controls")

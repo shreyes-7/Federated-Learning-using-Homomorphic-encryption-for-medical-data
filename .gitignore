@@ -9,3 +9,5 @@ venv/
 .streamlit/
 openfhe_lib/*/build/
 data/*/enc_*.txt
+submission_report_package/
+.codex
